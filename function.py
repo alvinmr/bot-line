@@ -387,8 +387,7 @@ class Boteater:
         return json.loads(requests.get(link, headers=self.tl_headers).text)["result"]["homeWebUrl"]
 
     def getGroupPost(self, mid):
-        link = self.lineServer + \
-            "/mh/api/v51/post/list.json?postLimit=999&commentLimit=999&likeLimit=999&homeId="+mid
+        link = self.lineServer + "/mh/api/v51/post/list.json?postLimit=999&commentLimit=999&likeLimit=999&homeId="+mid
         return json.loads(requests.get(link, headers=self.tl_headers).text)
 
     def likePost(self, mid, postId):
