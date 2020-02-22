@@ -18,7 +18,6 @@ import urllib
 import string
 import random
 import ntpath
-import threading
 from random import randint
 
 
@@ -32,26 +31,26 @@ class Boteater:
         self.stickerLinkAnimation = "https://stickershop.line-scdn.net/stickershop/v1/sticker/{}/iPhone/sticker_animation@2x.png"        
         self.dataHeaders = {
             "android_lite": {
-                "User-Agent": "LLA/2.10.3 SM-G930L 5.1.1",
-                "X-Line-Application": "ANDROIDLITE\t2.10.3\tAndroid OS\t5.1.1",
+                "User-Agent": "LLA/2.11.1 samsung 5.1.1",
+                "X-Line-Application": "ANDROIDLITE\t2.11.1\tAndroid OS\t5.1.1",
                 "x-lal": "en_ID",
                 "X-Line-Carrier": "51010,1-0"
             },
             "android": {
-                "User-Agent": "Line/9.2.2",
-                "X-Line-Application": "ANDROID\t9.2.2\tAndroid OS\t5.1.1",
+                "User-Agent": "Line/10.1.1",
+                "X-Line-Application": "ANDROID\t10.1.1\tAndroid OS\t5.1.1",
                 "x-lal": "en_ID",
                 "X-Line-Carrier": "51010,1-0"
             },
             "ios_ipad": {
-                "User-Agent": "Line/9.18.1",
-                "X-Line-Application": "IOSIPAD\t9.18.1\tiPhone 8\t11.2.5",
+                "User-Agent": "Line/10.1.1",
+                "X-Line-Application": "IOSIPAD\t10.1.1\tiPhone 8\t11.2.5",
                 "x-lal": "en_ID",
                 "X-Line-Carrier": "51010,1-0"
             },
             "ios": {
-                "User-Agent": "Line/9.18.1",
-                "X-Line-Application": "IOS\t9.18.1\tiPhone 8\t11.2.5",
+                "User-Agent": "Line/10.1.1",
+                "X-Line-Application": "IOS\t10.1.1\tiPhone 8\t11.2.5",
                 "x-lal": "en_ID",
                 "X-Line-Carrier": "51010,1-0"
             },
@@ -131,9 +130,6 @@ class Boteater:
         self.tokenOBS = self.acquireEncryptedAccessToken()
         print("[ Login ] Display Name: " + self.profile.displayName)
         print("[ Login ] Auth Token: " + self.headers["X-Line-Access"])
-        self.tempData = self.getDatabase()
-        if self.tempData == None:
-            self.tempData = self.readJson("tmp.json")
 
         ### TIMELINE HEADERS ###
         self.tl_headers = copy.deepcopy(self.headers)
@@ -161,17 +157,6 @@ class Boteater:
             f.close()
         return
 
-    def getDatabase(self):
-        try:
-            result = json.loads(requests.get("https://api.boteater.us/database?act=get&name="+self.profile.mid))
-            return result["result"]
-        except:
-            return None
-
-    def postDatabase(self):
-        result = json.loads(requests.post("https://api.boteater.us/database?act=post&name="+self.profile.mid, json=self.tempData))
-        return result["status"]
-
     def object2Direct(self, url, ext, headers=False):
         data = {"url": url,
                 "ext": ext}
@@ -180,9 +165,6 @@ class Boteater:
             return json.loads(r.text)["result"]
         if headers == True:
             r = requests.post(self.boteaterApi + "/line_obs?destination=local", data=data, headers=self.headers)
-            return json.loads(r.text)["result"]
-        if headers == None:
-            r = requests.post(self.boteaterApi + "/line_obs?destination=local", data=data, headers=self.tl_headers)
             return json.loads(r.text)["result"]
 
     def object2Gdrive(self, url, ext, headers=False):
@@ -818,7 +800,6 @@ class Boteater:
 
     def inviteIntoGroupCall(self, chatMid, memberMids=[]):
         return self.call.getGroupCall(chatMid, memberMids, 1)
-    
 
     ### SHOP FUNCTION ###
 
@@ -936,4 +917,3 @@ class Boteater:
                     raise Exception("[ Error ] Rotate QR Login")
             else:
                 raise Exception("[ Error ] Rotate QR Login")
-
