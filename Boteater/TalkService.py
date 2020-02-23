@@ -177,6 +177,14 @@ class Iface(object):
         """
         pass
 
+    def getGroup(self, groupId):
+        """
+        Parameters:
+         - groupId
+
+        """
+        pass
+
     def getCompactGroup(self, groupId):
         """
         Parameters:
@@ -497,12 +505,13 @@ class Iface(object):
         """
         pass
 
-    def sendChatRemoved(self, seq, chatMid, lastMessageId):
+    def sendChatRemoved(self, seq, chatMid, lastMessageId, sessionId):
         """
         Parameters:
          - seq
          - chatMid
          - lastMessageId
+         - sessionId
 
         """
         pass
@@ -526,11 +535,31 @@ class Iface(object):
         """
         pass
 
+    def updateProfileAttribute(self, reqSeq, attr, value):
+        """
+        Parameters:
+         - reqSeq
+         - attr
+         - value
+
+        """
+        pass
+
     def updateProfileAttributes(self, reqSeq, request):
         """
         Parameters:
          - reqSeq
          - request
+
+        """
+        pass
+
+    def updateSettingsAttribute(self, reqSeq, attr, value):
+        """
+        Parameters:
+         - reqSeq
+         - attr
+         - value
 
         """
         pass
@@ -1258,6 +1287,40 @@ class Client(Iface):
         if result.e is not None:
             raise result.e
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getGroupsV2 failed: unknown result")
+
+    def getGroup(self, groupId):
+        """
+        Parameters:
+         - groupId
+
+        """
+        self.send_getGroup(groupId)
+        return self.recv_getGroup()
+
+    def send_getGroup(self, groupId):
+        self._oprot.writeMessageBegin('getGroup', TMessageType.CALL, self._seqid)
+        args = getGroup_args()
+        args.groupId = groupId
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_getGroup(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getGroup_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.e is not None:
+            raise result.e
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getGroup failed: unknown result")
 
     def getCompactGroup(self, groupId):
         """
@@ -2561,23 +2624,25 @@ class Client(Iface):
             raise result.e
         return
 
-    def sendChatRemoved(self, seq, chatMid, lastMessageId):
+    def sendChatRemoved(self, seq, chatMid, lastMessageId, sessionId):
         """
         Parameters:
          - seq
          - chatMid
          - lastMessageId
+         - sessionId
 
         """
-        self.send_sendChatRemoved(seq, chatMid, lastMessageId)
+        self.send_sendChatRemoved(seq, chatMid, lastMessageId, sessionId)
         self.recv_sendChatRemoved()
 
-    def send_sendChatRemoved(self, seq, chatMid, lastMessageId):
+    def send_sendChatRemoved(self, seq, chatMid, lastMessageId, sessionId):
         self._oprot.writeMessageBegin('sendChatRemoved', TMessageType.CALL, self._seqid)
         args = sendChatRemoved_args()
         args.seq = seq
         args.chatMid = chatMid
         args.lastMessageId = lastMessageId
+        args.sessionId = sessionId
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -2669,6 +2734,42 @@ class Client(Iface):
             raise result.e
         return
 
+    def updateProfileAttribute(self, reqSeq, attr, value):
+        """
+        Parameters:
+         - reqSeq
+         - attr
+         - value
+
+        """
+        self.send_updateProfileAttribute(reqSeq, attr, value)
+        self.recv_updateProfileAttribute()
+
+    def send_updateProfileAttribute(self, reqSeq, attr, value):
+        self._oprot.writeMessageBegin('updateProfileAttribute', TMessageType.CALL, self._seqid)
+        args = updateProfileAttribute_args()
+        args.reqSeq = reqSeq
+        args.attr = attr
+        args.value = value
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_updateProfileAttribute(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = updateProfileAttribute_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        return
+
     def updateProfileAttributes(self, reqSeq, request):
         """
         Parameters:
@@ -2697,6 +2798,42 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = updateProfileAttributes_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.e is not None:
+            raise result.e
+        return
+
+    def updateSettingsAttribute(self, reqSeq, attr, value):
+        """
+        Parameters:
+         - reqSeq
+         - attr
+         - value
+
+        """
+        self.send_updateSettingsAttribute(reqSeq, attr, value)
+        self.recv_updateSettingsAttribute()
+
+    def send_updateSettingsAttribute(self, reqSeq, attr, value):
+        self._oprot.writeMessageBegin('updateSettingsAttribute', TMessageType.CALL, self._seqid)
+        args = updateSettingsAttribute_args()
+        args.reqSeq = reqSeq
+        args.attr = attr
+        args.value = value
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_updateSettingsAttribute(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = updateSettingsAttribute_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.e is not None:
@@ -3014,6 +3151,7 @@ class Processor(Iface, TProcessor):
         self._processMap["getSettingsAttributes2"] = Processor.process_getSettingsAttributes2
         self._processMap["getSettingsAttributes"] = Processor.process_getSettingsAttributes
         self._processMap["getGroupsV2"] = Processor.process_getGroupsV2
+        self._processMap["getGroup"] = Processor.process_getGroup
         self._processMap["getCompactGroup"] = Processor.process_getCompactGroup
         self._processMap["getGroupWithoutMembers"] = Processor.process_getGroupWithoutMembers
         self._processMap["getGroupIdsJoined"] = Processor.process_getGroupIdsJoined
@@ -3055,7 +3193,9 @@ class Processor(Iface, TProcessor):
         self._processMap["sendChatRemoved"] = Processor.process_sendChatRemoved
         self._processMap["sendMessage"] = Processor.process_sendMessage
         self._processMap["updateExtendedProfileAttribute"] = Processor.process_updateExtendedProfileAttribute
+        self._processMap["updateProfileAttribute"] = Processor.process_updateProfileAttribute
         self._processMap["updateProfileAttributes"] = Processor.process_updateProfileAttributes
+        self._processMap["updateSettingsAttribute"] = Processor.process_updateSettingsAttribute
         self._processMap["updateSettingsAttributes2"] = Processor.process_updateSettingsAttributes2
         self._processMap["updateGroupPreferenceAttribute"] = Processor.process_updateGroupPreferenceAttribute
         self._processMap["updateContactSetting"] = Processor.process_updateContactSetting
@@ -3550,6 +3690,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("getGroupsV2", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_getGroup(self, seqid, iprot, oprot):
+        args = getGroup_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getGroup_result()
+        try:
+            result.success = self._handler.getGroup(args.groupId)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TalkException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getGroup", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -4548,7 +4714,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = sendChatRemoved_result()
         try:
-            self._handler.sendChatRemoved(args.seq, args.chatMid, args.lastMessageId)
+            self._handler.sendChatRemoved(args.seq, args.chatMid, args.lastMessageId, args.sessionId)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -4620,6 +4786,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_updateProfileAttribute(self, seqid, iprot, oprot):
+        args = updateProfileAttribute_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = updateProfileAttribute_result()
+        try:
+            self._handler.updateProfileAttribute(args.reqSeq, args.attr, args.value)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TalkException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("updateProfileAttribute", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_updateProfileAttributes(self, seqid, iprot, oprot):
         args = updateProfileAttributes_args()
         args.read(iprot)
@@ -4642,6 +4834,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("updateProfileAttributes", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_updateSettingsAttribute(self, seqid, iprot, oprot):
+        args = updateSettingsAttribute_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = updateSettingsAttribute_result()
+        try:
+            self._handler.updateSettingsAttribute(args.reqSeq, args.attr, args.value)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TalkException as e:
+            msg_type = TMessageType.REPLY
+            result.e = e
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("updateSettingsAttribute", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -7575,6 +7793,144 @@ class getGroupsV2_result(object):
         return not (self == other)
 all_structs.append(getGroupsV2_result)
 getGroupsV2_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [Group, None], None, ),  # 0
+    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
+)
+
+
+class getGroup_args(object):
+    """
+    Attributes:
+     - groupId
+
+    """
+
+
+    def __init__(self, groupId=None,):
+        self.groupId = groupId
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 2:
+                if ftype == TType.STRING:
+                    self.groupId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getGroup_args')
+        if self.groupId is not None:
+            oprot.writeFieldBegin('groupId', TType.STRING, 2)
+            oprot.writeString(self.groupId.encode('utf-8') if sys.version_info[0] == 2 else self.groupId)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getGroup_args)
+getGroup_args.thrift_spec = (
+    None,  # 0
+    None,  # 1
+    (2, TType.STRING, 'groupId', 'UTF8', None, ),  # 2
+)
+
+
+class getGroup_result(object):
+    """
+    Attributes:
+     - success
+     - e
+
+    """
+
+
+    def __init__(self, success=None, e=None,):
+        self.success = success
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = Group()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = TalkException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getGroup_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getGroup_result)
+getGroup_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [Group, None], None, ),  # 0
     (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
 )
@@ -12993,14 +13349,16 @@ class sendChatRemoved_args(object):
      - seq
      - chatMid
      - lastMessageId
+     - sessionId
 
     """
 
 
-    def __init__(self, seq=None, chatMid=None, lastMessageId=None,):
+    def __init__(self, seq=None, chatMid=None, lastMessageId=None, sessionId=None,):
         self.seq = seq
         self.chatMid = chatMid
         self.lastMessageId = lastMessageId
+        self.sessionId = sessionId
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -13026,6 +13384,11 @@ class sendChatRemoved_args(object):
                     self.lastMessageId = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.sessionId = iprot.readBinary()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -13047,6 +13410,10 @@ class sendChatRemoved_args(object):
         if self.lastMessageId is not None:
             oprot.writeFieldBegin('lastMessageId', TType.STRING, 3)
             oprot.writeString(self.lastMessageId.encode('utf-8') if sys.version_info[0] == 2 else self.lastMessageId)
+            oprot.writeFieldEnd()
+        if self.sessionId is not None:
+            oprot.writeFieldBegin('sessionId', TType.STRING, 4)
+            oprot.writeBinary(self.sessionId)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -13070,6 +13437,7 @@ sendChatRemoved_args.thrift_spec = (
     (1, TType.I32, 'seq', None, None, ),  # 1
     (2, TType.STRING, 'chatMid', 'UTF8', None, ),  # 2
     (3, TType.STRING, 'lastMessageId', 'UTF8', None, ),  # 3
+    (4, TType.STRING, 'sessionId', 'BINARY', None, ),  # 4
 )
 
 
@@ -13436,6 +13804,155 @@ updateExtendedProfileAttribute_result.thrift_spec = (
 )
 
 
+class updateProfileAttribute_args(object):
+    """
+    Attributes:
+     - reqSeq
+     - attr
+     - value
+
+    """
+
+
+    def __init__(self, reqSeq=None, attr=None, value=None,):
+        self.reqSeq = reqSeq
+        self.attr = attr
+        self.value = value
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.reqSeq = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.attr = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.value = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('updateProfileAttribute_args')
+        if self.reqSeq is not None:
+            oprot.writeFieldBegin('reqSeq', TType.I32, 1)
+            oprot.writeI32(self.reqSeq)
+            oprot.writeFieldEnd()
+        if self.attr is not None:
+            oprot.writeFieldBegin('attr', TType.I32, 2)
+            oprot.writeI32(self.attr)
+            oprot.writeFieldEnd()
+        if self.value is not None:
+            oprot.writeFieldBegin('value', TType.STRING, 3)
+            oprot.writeString(self.value.encode('utf-8') if sys.version_info[0] == 2 else self.value)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(updateProfileAttribute_args)
+updateProfileAttribute_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I32, 'reqSeq', None, None, ),  # 1
+    (2, TType.I32, 'attr', None, None, ),  # 2
+    (3, TType.STRING, 'value', 'UTF8', None, ),  # 3
+)
+
+
+class updateProfileAttribute_result(object):
+    """
+    Attributes:
+     - e
+
+    """
+
+
+    def __init__(self, e=None,):
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = TalkException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('updateProfileAttribute_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(updateProfileAttribute_result)
+updateProfileAttribute_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
+)
+
+
 class updateProfileAttributes_args(object):
     """
     Attributes:
@@ -13569,6 +14086,155 @@ class updateProfileAttributes_result(object):
         return not (self == other)
 all_structs.append(updateProfileAttributes_result)
 updateProfileAttributes_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
+)
+
+
+class updateSettingsAttribute_args(object):
+    """
+    Attributes:
+     - reqSeq
+     - attr
+     - value
+
+    """
+
+
+    def __init__(self, reqSeq=None, attr=None, value=None,):
+        self.reqSeq = reqSeq
+        self.attr = attr
+        self.value = value
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I32:
+                    self.reqSeq = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I32:
+                    self.attr = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.value = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('updateSettingsAttribute_args')
+        if self.reqSeq is not None:
+            oprot.writeFieldBegin('reqSeq', TType.I32, 1)
+            oprot.writeI32(self.reqSeq)
+            oprot.writeFieldEnd()
+        if self.attr is not None:
+            oprot.writeFieldBegin('attr', TType.I32, 2)
+            oprot.writeI32(self.attr)
+            oprot.writeFieldEnd()
+        if self.value is not None:
+            oprot.writeFieldBegin('value', TType.STRING, 3)
+            oprot.writeString(self.value.encode('utf-8') if sys.version_info[0] == 2 else self.value)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(updateSettingsAttribute_args)
+updateSettingsAttribute_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I32, 'reqSeq', None, None, ),  # 1
+    (2, TType.I32, 'attr', None, None, ),  # 2
+    (3, TType.STRING, 'value', 'UTF8', None, ),  # 3
+)
+
+
+class updateSettingsAttribute_result(object):
+    """
+    Attributes:
+     - e
+
+    """
+
+
+    def __init__(self, e=None,):
+        self.e = e
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.e = TalkException()
+                    self.e.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('updateSettingsAttribute_result')
+        if self.e is not None:
+            oprot.writeFieldBegin('e', TType.STRUCT, 1)
+            self.e.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(updateSettingsAttribute_result)
+updateSettingsAttribute_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'e', [TalkException, None], None, ),  # 1
 )
