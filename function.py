@@ -346,6 +346,11 @@ class Boteater:
         return
 
     def postFlex(self, to, data):
+        flex_data = {
+            "type": "flex",
+            "altText": "Boteater Team",
+            "contents": data
+        }
         liff_struct = LiffViewRequest(
             liffId="1586794970-VKzbNLP7",
             context=LiffContext(chat=ChatContext(to)),
@@ -356,10 +361,57 @@ class Boteater:
                    'Content-Type': 'application/json',
                    'Authorization': 'Bearer {}'.format(bearer)}
         result = requests.post(self.liffServer, json={
-                               "messages": [data]}, headers=headers)
+                               "messages": [flex_data]}, headers=headers)
         if result.status_code != 200:
             raise Exception("[ Error ] Fail post flex")
         return
+
+    def postLinkWithFlex(self, to, link):
+        data = {
+                  "type": "bubble",
+                  "size": "kilo",
+                  "header": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                      {
+                        "type": "text",
+                        "text": "Boteater Team",
+                        "size": "xl",
+                        "color": "#000000",
+                        "weight": "bold",
+                        "decoration": "underline",
+                        "align": "center"
+                      }
+                    ]
+                  },
+                  "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                      {
+                        "type": "button",
+                        "action": {
+                          "type": "uri",
+                          "label": "== Open Link ==",
+                          "uri": link
+                        },
+                        "color": "#000000"
+                      }
+                    ],
+                    "borderWidth": "15px",
+                    "borderColor": "#01A9DB"
+                  },
+                  "styles": {
+                    "header": {
+                      "backgroundColor": "#01A9DB"
+                    },
+                    "body": {
+                      "backgroundColor": "#81F7F3"
+                    }
+                  }
+                }
+        return self.postFlex(to, data)
 
     def linkSendMessage(self, msg):
         return "line://app/1586794970-VKzbNLP7?act=msg&text="+msg
@@ -571,37 +623,40 @@ class Boteater:
         msg.relatedMessageServiceCode = 1
         return self.talk.sendMessage(0, msg)
 
-    def sendMessageWithMention(self, to, text='', dataMid=[]):
-        arr = []
-        list_text = ''
-        if '[list]' in text.lower():
-            i = 0
-            for l in dataMid:
-                list_text += '\n@[list-'+str(i)+']'
-                i = i+1
-            text = text.replace('[list]', list_text)
-        elif '[list-' in text.lower():
-            text = text
+    def sendMention(self, to, mid, text):
+        mentiones = '{"S":"0","E":"3","M":'+json.dumps(mid)+'}'
+        text_ = '@x  {}'.format(text)
+        return self.sendMessage(to, text_, contentMetadata={'MENTION':'{"MENTIONEES":['+mentiones+']}'}, contentType=0)
+
+    def getMentiones(self, msg):
+        if 'MENTION' in msg.contentMetadata.keys()!= None:
+            mention = ast.literal_eval(msg.contentMetadata['MENTION'])
+            mentionees = mention['MENTIONEES']
+            mid_list = []
+            for mention in mentionees:
+                if mention["M"] not in mid_list:
+                    mid_list.append(mention["M"])
+            return mid_list
         else:
-            i = 0
-            for l in dataMid:
-                list_text += ' @[list-'+str(i)+']'
-                i = i+1
-            text = text+list_text
-        i = 0
-        for l in dataMid:
-            mid = l
-            name = '@[list-'+str(i)+']'
-            ln_text = text.replace('\n', ' ')
-            if ln_text.find(name):
-                line_s = int(ln_text.index(name))
-                line_e = (int(line_s)+int(len(name)))
-            arrData = {'S': str(line_s), 'E': str(line_e), 'M': mid}
+            return None
+
+    def sendTagAll(self, gmid):
+        arr = []
+        num = 0
+        ret = ""
+        group = self.talk.getGroup(gmid)
+        members = [mem.mid for mem in group.members]
+        for i in members:
+            arrData = {'S':str(len(ret)), 'E':str(len(ret) + len("@x\n") - 1), 'M':i}
             arr.append(arrData)
-            i = i+1
-        contentMetadata = {'MENTION': str(
-            '{"MENTIONEES":' + json.dumps(arr).replace(' ', '') + '}')}
-        return self.sendMessage(to, text, contentMetadata)
+            ret+= "@x\n"
+            num+=1
+            if num == 20:
+                self.sendMessage(gmid, ret, {'MENTION': str('{"MENTIONEES":' + json.dumps(arr) + '}')}, 0)
+                num=1
+                arr= []
+                ret = ""
+        return self.sendMessage(gmid, ret, {'MENTION': str('{"MENTIONEES":' + json.dumps(arr) + '}')}, 0)
 
     def sendGroupsBc(self, to, text):
         num= 0
@@ -624,24 +679,6 @@ class Boteater:
             except:
                 pass
         return self.sendMessage(to,"Success broadcast {} friends".format(num))
-
-    def sendTagAll(self, gmid):
-        arr = []
-        num = 0
-        ret = ""
-        group = self.getGroup(gmid)
-        members = [mem.mid for mem in group.members]
-        for i in members:
-            arrData = {'S':str(len(ret)), 'E':str(len(ret) + len("@x\n") - 1), 'M':i}
-            arr.append(arrData)
-            ret+= "@x\n"
-            num+=1
-            if num == 20:
-                self.sendMessage(gmid, ret, {'MENTION': str('{"MENTIONEES":' + json.dumps(arr) + '}')}, 0)
-                num=1
-                arr= []
-                ret = ""
-        return self.sendMessage(gmid, ret, {'MENTION': str('{"MENTIONEES":' + json.dumps(arr) + '}')}, 0)
 
     def sendContact(self, to, mid):
         return self.sendMessage(to, '', {'mid': mid}, 13)
@@ -745,9 +782,6 @@ class Boteater:
     def getGroupIdsJoined(self, syncReason=4):
         return self.talk.getGroupIdsJoined(syncReason)
 
-    def getGroup(self, groupId):
-        return self.talk.getGroup(groupId)
-
     def getGroupsV2(self, groupIds):
         return self.talk.getGroupsV2(groupIds)
 
@@ -798,8 +832,21 @@ class Boteater:
         return self.call.getGroupCall(chatMid)
 
     def inviteIntoGroupCall(self, chatMid, memberMids=[]):
-        return self.call.getGroupCall(chatMid, memberMids, 1)
+        return self.call.inviteIntoGroupCall(chatMid, memberMids, 1)
 
+    def spamCall(self, to, count=3):
+        group = self.getGroup(to)
+        members = [mem.mid for mem in group.members]
+        status = self.getGroupCall(to)
+        if status.online == False or status.mediaType != 1:
+            self.sendMessage(to, "No group call found...")
+            return
+        for num in range(count):
+            self.inviteIntoGroupCall(to, members)
+            time.sleep(0.3)
+            self.sendMessage(to, "Success invite call..")
+        return
+    
     ### SHOP FUNCTION ###
 
     def getProductSticker(self, productId):
@@ -916,3 +963,4 @@ class Boteater:
                     raise Exception("[ Error ] Rotate QR Login")
             else:
                 raise Exception("[ Error ] Rotate QR Login")
+
