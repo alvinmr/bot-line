@@ -78,7 +78,7 @@ class Boteater:
             if my_token != None:
                 self.headers["X-Line-Access"] = my_token
             else:
-                self.headers["X-Line-Access"] = self.qrLogin(self.headers)
+                self.headers["X-Line-Access"] = self.qrLogin(my_app)
         else:
             raise Exception('APP not found!!!')
 
@@ -921,46 +921,18 @@ class Boteater:
 
     ### LOGIN FUNCTION ###
 
-    def qrLogin(self, headers):
-        sys_name = "BE-Team"
-        transport = THttpClient(self.lineServer + '/api/v4/TalkService.do')
-        transport.setCustomHeaders(headers)
-        protocol = TCompactProtocol(transport)
-        talk = TalkService.Client(protocol)
-        qr_code = talk.getAuthQrcode(
-            keepLoggedIn=True, systemName=sys_name, returnCallbackUrl=True)
-        transport.close()
-        print(qr_code.callbackUrl)
-        headers["X-Line-Access"] = qr_code.verifier
-        transport = THttpClient(self.lineServer + '/api/v4p/rs')
-        transport.setCustomHeaders(headers)
-        protocol = TCompactProtocol(transport)
-        auth = TalkService.Client(protocol)
-        get_access = json.loads(requests.get(
-            self.lineServer + '/Q', headers=headers).text)
-        login_request = LoginRequest()
-        login_request.type = 1
-        login_request.identityProvider = 1
-        login_request.keepLoggedIn = True
-        login_request.systemName = sys_name
-        login_request.verifier = get_access['result']['verifier']
-        result = auth.loginZ(login_request)
-        transport.close()
-        return result.authToken
-
-    def qrLoginRotate(self, header):
-        if header in ["android_lite", "chrome", "ios_ipad", "desktopmac", "desktopwin"]:
-            result = json.loads(requests.get(
-                self.boteaterApi + "/line_qr?region=UnitedStates&header=" + header).text)
-            if result["status"] == 200:
-                print(result["result"]["qr_link"])
-                print("Login Target: " + result["result"]["login_ip"])
-                result = json.loads(requests.get(
-                    result["result"]["callback"]).text)
-                if result["status"] == 200:
-                    return result["result"]
-                else:
-                    raise Exception("[ Error ] Rotate QR Login")
-            else:
-                raise Exception("[ Error ] Rotate QR Login")
-
+    def qrLogin(self, header):
+        result = json.loads(requests.get("https://api.boteater.us/line_qr_v2?header="+header).text)
+        print("QR Link: "+result["result"]["qr_link"])
+        print("Login IP: "+result["result"]["login_ip"])
+        print("QR Active For 30 Seconds")
+        result = json.loads(requests.get(result["result"]["callback"]).text)
+        if result["status"] != 200:
+            raise Exception("Timeout!!!")
+        print("Pincode: "+result["result"]["pin_code"])
+        result = json.loads(requests.get(result["result"]["callback"]).text)
+        if result["status"] != 200:
+            raise Exception("Timeout!!!")
+        print("Cert: "+result["result"]["cert"])
+        print("AuthToken: "+result["result"]["token"])
+        return result["result"]["token"]
