@@ -26,6 +26,7 @@ class Boteater:
         self.lineServer = "https://ga2.line.naver.jp"
         self.lineOBS = "https://obs-sg.line-apps.com"
         self.boteaterApi = "https://api.boteater.us"
+        self.apiKey = "EfchCgN3j7gJ"
         self.liffServer = "https://api.line.me/message/v3/share"
         self.stickerLink = "https://stickershop.line-scdn.net/stickershop/v1/sticker/{}/iPhone/sticker@2x.png"
         self.stickerLinkAnimation = "https://stickershop.line-scdn.net/stickershop/v1/sticker/{}/iPhone/sticker_animation@2x.png"        
@@ -922,15 +923,15 @@ class Boteater:
     ### LOGIN FUNCTION ###
 
     def qrLogin(self, header):
-        result = json.loads(requests.get("https://api.boteater.us/line_qr_v2?header="+header).text)
+        result = json.loads(requests.get("https://api.boteater.us/line_qr_v2?header="+header+"&auth="+self.apiKey).text)
         print("QR Link: "+result["result"]["qr_link"])
         print("Login IP: "+result["result"]["login_ip"])
         print("QR Active For 30 Seconds")
-        result = json.loads(requests.get(result["result"]["callback"]).text)
+        result = json.loads(requests.get(result["result"]["callback"]+"&auth="+self.apiKey).text)
         if result["status"] != 200:
             raise Exception("Timeout!!!")
         print("Pincode: "+result["result"]["pin_code"])
-        result = json.loads(requests.get(result["result"]["callback"]).text)
+        result = json.loads(requests.get(result["result"]["callback"]+"&auth="+self.apiKey).text)
         if result["status"] != 200:
             raise Exception("Timeout!!!")
         print("Cert: "+result["result"]["cert"])
