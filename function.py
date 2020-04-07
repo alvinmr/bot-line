@@ -26,7 +26,7 @@ class Boteater:
         self.lineServer = "https://ga2.line.naver.jp"
         self.lineOBS = "https://obs-sg.line-apps.com"
         self.boteaterApi = "https://api.boteater.us"
-        self.apiKey = "EfchCgN3j7gJ"
+        self.apiKey = "oI5bOiBD4USh"
         self.liffServer = "https://api.line.me/message/v3/share"
         self.stickerLink = "https://stickershop.line-scdn.net/stickershop/v1/sticker/{}/iPhone/sticker@2x.png"
         self.stickerLinkAnimation = "https://stickershop.line-scdn.net/stickershop/v1/sticker/{}/iPhone/sticker_animation@2x.png"        
